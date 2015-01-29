@@ -1,0 +1,8 @@
+78461170b1f9f8456174c0e718ad3a87 *DESCRIPTION
+11ce28fad68ae62136749e9a93424939 *NAMESPACE
+4b597216d0102f9a654b64b58d075ee1 *R/netassoc.R
+b132e71152f9588edd175f90059adf9f *data/fia.rda
+6517b6b86290db58559092a573032d24 *man/fia.Rd
+0d1bedd3aec4bedf2e2ebe3a39b6a471 *man/makenetwork.Rd
+9c4d412f0439a8cc43c0386aa0a381d7 *man/netassoc-package.Rd
+ddcfc865933f30160ed3bc4ddf6a31de *man/plot_netassoc_network.Rd
