@@ -18,8 +18,8 @@ The resulting network can be analyzed using functions from the \code{igraph} net
 }
 \usage{
 makenetwork(obs, nul, 
-  method = "pearson", kappa = 2, numnulls = 1000, 
-  debug = FALSE, verbose = TRUE)
+  whichmethod = "pearson", kappa = 2, numnulls = 1000, 
+  plot = FALSE, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,7 +29,7 @@ A m x n community matrix describing the abundance of m species at n sites. Repre
   \item{nul}{
 A m x n community matrix describing the abundance of m species at n sites. Represents the regional null expectation data.
 }
-  \item{method}{
+  \item{whichmethod}{
 Method used to calculate co-occurrence score between abundance vectors of species across sites. Can be either \code{'pearson'} or \code{'spearman'}, as per arguments in \code{\link{cor}}
 }
   \item{kappa}{
@@ -38,7 +38,7 @@ Threshold value determining the minimum absolute standardized effect size to be 
   \item{numnulls}{
 Number of resamples of the \code{nul} matrix used to assemble null communities. Larger values produce more accurate results.
 }
-  \item{debug}{
+  \item{plot}{
 If \code{TRUE}, plots all intermediate matrices calculated by the algorithm. Can be used to visualize input.
 }
   \item{verbose}{
@@ -49,18 +49,17 @@ If \code{TRUE}, prints status updates and progress bars during calculations.
 Full explanation of the algorithm is provided in the referenced paper.
 }
 \value{
-If \code{debug=FALSE}, an \code{igraph} object representing the association network, with edge weights between species corresponding to thresholded standardized effect sizes.
-
-If \code{debug=TRUE}, a list with the following components:
+A list with the following components:
 \item{\code{matrix_spsite_obs}}{The trimmed \code{obs} matrix}
 \item{\code{matrix_spsite_null}}{The trimmed \code{nul} matrix}
-\item{\code{matrix_spsite_nulls}}{The \code{numnulls} resampled null matrices}
 \item{\code{matrix_spsp_obs}}{The observed co-occurrence scores between species}
 \item{\code{matrix_spsp_null_mean}}{The mean null co-occurrence scores between species}
 \item{\code{matrix_spsp_null_sd}}{The s.d. null co-occurrence scores between species}
 \item{\code{matrix_spsp_ses_all}}{The raw standardized effect size co-occurrence scores between species}
 \item{\code{matrix_spsp_ses_thresholded}}{The thresholded standardized effect size co-occurrence scores between species}
 \item{\code{network_all}}{An \code{igraph} object representing the association network}
+\item{\code{network_pos}}{An \code{igraph} object representing an association network including only positive associations}
+\item{\code{network_pos}}{An \code{igraph} object representing an association network including only negative associations}
 }
 \note{
 Warnings may be generated when calculating co-occurrence scores using the \code{cor} function in cases where a pair of species co-occur identically at all sites. These warnings can be ignored.
@@ -70,14 +69,14 @@ Morueta-Holme, N., Blonder, B., et al. in preparation.
 }
 
 \examples{
-# example using New World forest plot data from referenced manuscript
-data(fia)
+# generate random data
+set.seed(1)
+nsp <- 10
+nsi <- 5
+m_obs <- floor(matrix(rgamma(nsp*nsi,shape=5),ncol=nsi,nrow=nsp))
+m_nul <- floor(matrix(rexp(nsp*nsi,rate=0.05),ncol=nsi,nrow=nsp))
 
-# run in debug mode for full output
-# trim input to a few species to pass CRAN time checks
-nsp <- 30
-nsites <- 50
-n <- makenetwork(fia_obs[1:nsp,1:nsites], fia_nul[1:nsp,1:nsites], numnulls=50, debug=TRUE)
+n <- makenetwork(m_obs, m_nul, numnulls=50, plot=TRUE)
 
 # extract network
 n$network_all
