@@ -1,7 +1,7 @@
 # generate null sp x site matrices with same total abundance as observed and species probabilities drawn abundances within the base null matrix
 generate_nul_resample <- function(nul, obs)
 {
-  nul_resample <- matrix(0, nrow=nrow(nul),ncol=ncol(nul),dimnames=dimnames(nul))
+  nul_resample <- matrix(0, nrow=nrow(nul),ncol=ncol(nul),dimnames=dimnames(nul)) # auto-set sparseness depending on filling
   for (i in 1:ncol(nul_resample))
   {
     # fill in resamples with the same total abundance
@@ -12,7 +12,7 @@ generate_nul_resample <- function(nul, obs)
   return(nul_resample)
 }  
 
-makenetwork <- function(obs, nul, whichmethod='pearson', kappa=2, numnulls=1000, plot=FALSE,verbose=TRUE)
+makenetwork <- function(obs, nul, whichmethod='pearson', alpha=0.05, numnulls=1000, plot=FALSE,verbose=TRUE)
 {	
   if (is.matrix(obs) & is.null(dimnames(obs)))
   {
@@ -42,6 +42,13 @@ makenetwork <- function(obs, nul, whichmethod='pearson', kappa=2, numnulls=1000,
   {
   	stop(sprintf("Some sites are empty: %s",paste(names(problemsites),collapse=", ")))
   }
+  
+  numtests <- nrow(obs)*(nrow(obs)-1)/2
+  alpha_bonferroni <- (alpha/numtests)
+  
+  kappa <- qnorm(1-alpha_bonferroni/2)
+  
+  cat(sprintf("Number of tests: %d\nBonferroni-corrected alpha value: %f\nKappa threshold for overall alpha=%f level: %f\n", numtests, alpha_bonferroni, alpha, kappa))
 
   if (plot==TRUE)
   {
@@ -58,26 +65,17 @@ makenetwork <- function(obs, nul, whichmethod='pearson', kappa=2, numnulls=1000,
     plot_netassoc_matrix(nul, colors=colorRampPalette(c('white','black'))(51),onesided=TRUE,main="Null sp x site")
   }
   
-  
-  if (verbose==TRUE) { cat('Generating null replicates...') }
-  nulls <- vector(mode="list",length=numnulls)
-
-  nulls <- replicate(numnulls, {if(verbose==TRUE) {  cat('.') }; return(generate_nul_resample(nul, obs))  })
-  
-  if (verbose==TRUE) { cat('...done.\n') }
-  
-  if (plot==TRUE)
-  {
-    plot_netassoc_matrix(nulls[,,1], colors=colorRampPalette(c('white','black'))(51),onesided=TRUE,main="Example null resample sp x site")
-  }	
-  
   fm_obs <- matrix(NA,nrow=nrow(obs),ncol=nrow(obs))
+  
   fm_nul_mean <- matrix(NA,nrow=nrow(obs),ncol=nrow(obs))
   fm_nul_sd <- matrix(NA,nrow=nrow(obs),ncol=nrow(obs))
   
   finalmatrix <- matrix(NA,nrow=nrow(obs),ncol=nrow(obs))
   
-  if (verbose==TRUE) { cat('Calculating co-occurrence scores...') }
+  
+  
+  if (verbose==TRUE) { cat('Calculating observed co-occurrence scores...') }
+  
   count <- 0
   for (i in 1:nrow(obs))
   {
@@ -86,48 +84,57 @@ makenetwork <- function(obs, nul, whichmethod='pearson', kappa=2, numnulls=1000,
       if (i!=j)
       {
         count <- count + 1
+        
         if (verbose==TRUE) { cat (sprintf('%d %d %.3f ', i, j, count/(nrow(obs)*(nrow(obs)-1)/2))) }
         
-        if (verbose==TRUE) { cat('obs') }
         veci_obs <- as.numeric(obs[i,])
         vecj_obs <- as.numeric(obs[j,])
-        cor_obs <- cor(x=veci_obs, y=vecj_obs, method=whichmethod)
+        suppressWarnings(
+          cor_obs <- cor(x=veci_obs, y=vecj_obs, method=whichmethod)
+        )
         fm_obs[i,j] <- cor_obs
-        if (verbose==TRUE) { cat('. ') }
-
-        if (!is.na(cor_obs))
-        {
-          cor_nul <- rep(NA, numnulls)
-          
-          for (k in 1:numnulls)
-          {
-            if (verbose==TRUE) { cat('.') }
-            veci_nul <- as.numeric(nulls[i,,k])
-            vecj_nul <- as.numeric(nulls[j,,k])
-            cor_nul[k] <- cor(x=veci_nul, y=vecj_nul, method=whichmethod)
-            if (verbose==TRUE) { cat('. ') }
-          }
-          
-          fm_nul_mean[i,j] <- mean(cor_nul,na.rm=T)
-          fm_nul_sd[i,j] <- sd(cor_nul,na.rm=T)    
-        }
-        else
-        {
-          if (verbose==TRUE) { cat('nul NONE') }
-        }
-        if (verbose==TRUE) { cat('\n') }
+        
       }
     }
   }
-  # save some memory
-  rm(nulls)
-  if (verbose==TRUE) { cat('...done.\n') }
   
-  # calculate standard effect size
-  if (verbose==TRUE) { cat('Calculating standardized effect sizes...') }
+  cor_nul <- array(data=NA,dim=c(nrow(obs),nrow(obs),numnulls))
+  for (k in 1:numnulls)
+  {
+    # Generating null
+    if (verbose==TRUE) { cat(sprintf('Generating null replicate %d...', k)) }
+    thisnull <- generate_nul_resample(nul, obs)
+    if (verbose==TRUE) { cat('...done.\n') }
+    
+      count <- 0
+      for (i in 1:nrow(obs))
+      {
+        for (j in i:nrow(obs))
+        {
+          if (i!=j)
+          {
+            count <- count + 1
+            if (verbose==TRUE) { cat (sprintf('%d %d %.3f\n', i, j, count/(nrow(obs)*(nrow(obs)-1)/2))) }
+            
+            veci_nul <- as.numeric(thisnull[i,])
+            vecj_nul <- as.numeric(thisnull[j,])
+            suppressWarnings(
+              cor_nul[i,j,k] <- cor(x=veci_nul, y=vecj_nul, method=whichmethod)
+            )
+        }
+      }
+    }
+  }
+  
+  # calculating null distributions
+  fm_nul_mean <- apply(cor_nul, c(1,2), mean, na.rm=T)
+  fm_nul_sd <- apply(cor_nul, c(1,2), sd, na.rm=T)  
+  
   finalmatrix <- (fm_obs - fm_nul_mean) / fm_nul_sd
-  if (verbose==TRUE) { cat('...done.\n') }
   
+
+  if (verbose==TRUE) { cat('...done.\n') }
+
   if (plot==TRUE)
   {
     plot_netassoc_matrix(fm_obs, xlab='Species',ylab='Species',colors=colorRampPalette(c('red','white','blue'))(51),main="Observed co-occurrence score for sp x sp")
@@ -191,7 +198,7 @@ makenetwork <- function(obs, nul, whichmethod='pearson', kappa=2, numnulls=1000,
 
 
 # plot network
-plot_netassoc_network <- function(network, layout = layout.auto(network), 
+plot_netassoc_network <- function(network, layout = layout.fruchterman.reingold(network), 
                                   vertex.label = V(network)$name, 
                                   vertex.color = NA, 
                                   vertex.shape = "none",
