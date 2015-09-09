@@ -18,6 +18,7 @@ plot_netassoc_network(network, layout = layout.fruchterman.reingold(network),
   edge.color = NULL, 
   edge.arrow.size = 0.05, 
   vertex.label.cex = 0.5, 
+  legend = TRUE,
    ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -55,6 +56,9 @@ Vertex label expansion factor for species.
   \item{vertex.label.family}{
 Vertex shape font family for species.
 }
+  \item{legend}{
+If \code{TRUE}, plots a scale legend.
+}
   \item{\dots}{
 Other arguments to be passed to \code{\link{plot.igraph}}.
 }
@@ -62,13 +66,13 @@ Other arguments to be passed to \code{\link{plot.igraph}}.
 
 \examples{
 # generate random data
-set.seed(1)
+set.seed(5)
 nsp <- 10
 nsi <- 5
 m_obs <- floor(matrix(rgamma(nsp*nsi,shape=5),ncol=nsi,nrow=nsp))
 m_nul <- floor(matrix(rexp(nsp*nsi,rate=0.05),ncol=nsi,nrow=nsp))
 
-n <- makenetwork(m_obs, m_nul, numnulls=50, plot=TRUE)
+n <- make_netassoc_network(m_obs, m_nul, numnulls=100, plot=TRUE,alpha=0.5)
 
 # plot
 plot_netassoc_network(n$network_all)

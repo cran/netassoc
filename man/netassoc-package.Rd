@@ -3,10 +3,10 @@
 \alias{netassoc}
 \docType{package}
 \title{
-Inference of species assocations from co-occurrence data
+Inference of Species Assocations from Co-Occurrence Data
 }
 \description{
-Infers species associations from local and regional-scale co-occurrence data (species x site matrices). The resulting network can be analyzed using functions from the \code{igraph} network package.
+Infers species associations from community matrices. Uses local and (optional) regional-scale co-occurrence data by comparing observed partial correlation coefficients between species to those estimated from regional species distributions. Extends Gaussian graphical models to a null modeling framework. Provides interface to a variety of inverse covariance matrix estimation methods.
 }
 \author{
 Benjamin Blonder, Naia Morueta-Holme
