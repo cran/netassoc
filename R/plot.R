@@ -1,6 +1,6 @@
 
 # plot network
-plot_netassoc_network <- function(network, layout = layout.fruchterman.reingold(network), 
+plot_netassoc_network <- function(network, layout = layout_nicely(network), 
                                   vertex.label = V(network)$name, 
                                   vertex.color = NA, 
                                   vertex.shape = "none",
