@@ -1,13 +1,13 @@
-751c5ad35b48386295dd9807e29e5aef *DESCRIPTION
+ddbdb06372916b4ce41ad191353d5528 *DESCRIPTION
 5277b9b96cb92ab68ec6bc142e3b0eb4 *NAMESPACE
 c39460d085cf3ce914cf94344b1f47c3 *R/generate_nul_resample.R
 0da717e3c3000fa8d3c0549220db32c0 *R/make_netassoc_network.R
 7b95b8c6278534ba92d0d10d054c829e *R/pairwise_association.R
 e488d1659f38e75ae04bf4beadb7a723 *R/partial_correlation.R
 b0f183c5bcab928a7c653cfed155e560 *R/plot.R
-e37052ada824878367e60059827bfc2f *man/make_netassoc_network.Rd
+7c60ea674ee18bc44a6ff8127f6d7058 *man/make_netassoc_network.Rd
 8f11cf7649b395ffd95a9d9eb3afd309 *man/netassoc-package.Rd
 93226c98aac9dc52931e74d962f4fa5e *man/pairwise_association.Rd
-04ed50d71962306786218a6b3a336a81 *man/partial_correlation.Rd
+c4b53ee5876a0dca81ebf02769f90a0e *man/partial_correlation.Rd
 b533e6b2c50de93c38845bb5833d404e *man/plot_netassoc_matrix.Rd
-dedab9c256bdc1c9e55bb3458c925a1d *man/plot_netassoc_network.Rd
+bac524e4e67603986388d4462bd90ae7 *man/plot_netassoc_network.Rd
