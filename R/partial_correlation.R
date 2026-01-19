@@ -1,11 +1,12 @@
 partial_correlation <- function(mat, method, verbose=FALSE)
 { 
   # calculate inverse covariance matrix
-  if (method=="glasso")
-  {
-    invcov <- as.matrix(huge::huge.select(huge(t(mat),method="glasso",verbose=verbose),criterion="ebic",verbose=verbose)$opt.icov)
-  }
-  else if (method=="shrinkage")
+  # if (method=="glasso")
+  # {
+  #   invcov <- as.matrix(huge::huge.select(huge(t(mat),method="glasso",verbose=verbose),criterion="ebic",verbose=verbose)$opt.icov)
+  # }
+  # else 
+  if (method=="shrinkage")
   {
     # use auto-selected lambda shrinkage parameter
     invcov <- corpcor::invcov.shrink(t(mat), verbose=verbose)
